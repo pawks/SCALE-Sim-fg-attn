@@ -26,13 +26,14 @@ class write_port:
         self.request_array = []
         self.count = 0
         self.config = config()
-    
+        self.delay = True
+
     def def_params( self,
                     config = config(),
                     latency_file =''
                 ):
         """
-        Method to define the paths of ramulator trace numpy files 
+        Method to define the paths of ramulator trace numpy files
         and write request queue sizes.
         """
         self.config = config
@@ -63,9 +64,12 @@ class write_port:
         """
         Method to service read request by the read buffer.
         Check for hit in the request queue or add the DRAM
-        roundtrip latency for each transaction reported by 
+        roundtrip latency for each transaction reported by
         Ramulator.
         """
+        if not self.delay:
+            out_cycles_arr = incoming_cycles_arr_np
+            return out_cycles_arr
         if self.ramulator_trace == False:
             out_cycles_arr_np = incoming_cycles_arr_np + self.latency
             out_cycles_arr_np = out_cycles_arr_np.reshape((out_cycles_arr_np.shape[0], 1))

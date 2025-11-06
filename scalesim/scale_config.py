@@ -56,7 +56,7 @@ class scale_config:
         self.sparsity_optimized_mapping = False
         self.sparsity_block_size = 4
         self.sparsity_rand_seed = 40
-    
+
     # Sarbartha: Added ramulator based DRAM trace support
         self.use_ramulator_trace = False
     #
@@ -84,16 +84,16 @@ class scale_config:
             message = 'ERROR: ' + me
             message += 'Use either USER or CALC in InterfaceBandwidth feild. Aborting!'
             return
-        
+
         ramulator_on = config.get(section, 'UseRamulatorTrace')
         if ramulator_on == 'True':
             self.use_ramulator_trace = True
         else:
             self.use_ramulator_trace = False
-        
+
         # TODO Sarbartha: Should be bw
         div_factor = 1
-        
+
         section = 'architecture_presets'
         self.array_rows = int(config.get(section, 'ArrayHeight'))
         self.array_cols = int(config.get(section, 'ArrayWidth'))
@@ -106,6 +106,9 @@ class scale_config:
         self.df = config.get(section, 'Dataflow')
         self.req_buf_sz_rd = int(config.get(section, 'ReadRequestBuffer')) // div_factor
         self.req_buf_sz_wr = int(config.get(section, 'WriteRequestBuffer')) // div_factor
+        self.ifmap_dly = config.getboolean(section, 'IFMAPDelay', fallback=True)
+        self.fltr_dly = config.getboolean(section, 'FilterDelay', fallback=True)
+        self.ofmap_dly = config.getboolean(section, 'OFMAPDelay', fallback=True)
 
         layout_section = 'layout'
         self.using_ifmap_custom_layout = config.getboolean(layout_section, 'IfmapCustomLayout')
@@ -116,7 +119,7 @@ class scale_config:
         self.filter_sram_bank_bandwidth = int(config.get(layout_section, 'FilterSRAMBankBandwidth'))
         self.filter_sram_bank_num = int(config.get(layout_section, 'FilterSRAMBankNum'))
         self.filter_sram_bank_port = int(config.get(layout_section, 'FilterSRAMBankPort'))
-        
+
         # Anand: ISSUE #2. Patch
         if self.use_user_bandwidth:
             self.bandwidths = [int(x.strip())
@@ -256,7 +259,7 @@ class scale_config:
         Method to set the topology file path.
         """
         self.topofile = topofile
-    
+
     #
     def set_layout_file(self, layoutfile=''):
         self.layoutfile = layoutfile
@@ -409,28 +412,28 @@ class scale_config:
         """
         if self.valid_conf_flag:
             return self.ifmap_offset, self.filter_offset, self.ofmap_offset
-    
+
     def get_ramulator_trace(self):
         """
         Method to check if the run considers ramulator trace numpy files
         """
         if self.valid_conf_flag:
             return self.use_ramulator_trace
-    
+
     def get_req_buf_sz_rd(self):
         """
         Method to set the read request buffer size
         """
         if self.valid_conf_flag:
             return self.req_buf_sz_rd
-    
+
     def get_req_buf_sz_wr(self):
         """
         Method to set the write request buffer size
         """
         if self.valid_conf_flag:
             return self.req_buf_sz_wr
-    
+
     #
     def get_bandwidths_as_string(self):
         """
@@ -452,7 +455,7 @@ class scale_config:
       Method to get the bandwidths as a value.
       """
       if self.valid_conf_flag:
-          return self.filter_sram_bank_bandwidth     
+          return self.filter_sram_bank_bandwidth
 
     #
     def get_bandwidths_as_list(self):
@@ -465,15 +468,15 @@ class scale_config:
     def get_bandwidths_as_list(self):
         if self.valid_conf_flag:
             return self.bandwidths
-        
+
     def get_num_bank(self):
         if self.valid_conf_flag:
             return self.num_bank
-        
+
     def get_num_port(self):
         if self.valid_conf_flag:
             return self.num_port
-        
+
     def get_min_dram_bandwidth(self):
         """
         Method to get the minimum DRAM bandwidth defined in the configuration.

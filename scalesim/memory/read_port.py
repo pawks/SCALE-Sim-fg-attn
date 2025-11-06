@@ -24,13 +24,14 @@ class read_port:
         self.request_array = []
         self.count = 0
         self.config = config()
+        self.delay = True
     #
     def def_params( self,
                     config = config(),
                     latency_file = ''
                 ):
         """
-        Method to define the paths of ramulator trace numpy files 
+        Method to define the paths of ramulator trace numpy files
         and read request queue sizes.
         """
         self.config = config
@@ -42,7 +43,7 @@ class read_port:
             #print(f"Latency file is {latency_file}")
         self.stall_cycles=0
         self.latency = 1
-        
+
     def set_params(self, latency):
         """
         Method to set the backing buffer hit latency for housekeeping.
@@ -55,7 +56,7 @@ class read_port:
         Method to get the backing buffer hit latency for housekeeping.
         """
         return self.latency
-    
+
     def find_latency(self):
         """
         Method to map DRAM return path latency for each transactions.
@@ -75,9 +76,12 @@ class read_port:
         """
         Method to service read request by the read buffer.
         Check for hit in the request queue or add the DRAM
-        roundtrip latency for each transaction reported by 
+        roundtrip latency for each transaction reported by
         Ramulator.
         """
+        if not self.delay:
+            out_cycles_arr = incoming_cycles_arr
+            return out_cycles_arr
         if self.ramulator_trace is False:
             out_cycles_arr = incoming_cycles_arr + self.latency
             return out_cycles_arr
@@ -105,6 +109,6 @@ class read_port:
             elif len(self.request_array) > self.request_queue_size:
                 self.request_array = self.request_array[-self.request_queue_size:]
                 #print(f"stall cycle: {self.stall_cycles}. request array: {self.request_array[0]} updated_req_timestamp: {updated_req_timestamp}")
-        
+
         self.stall_cycles=0
         return out_cycles_arr

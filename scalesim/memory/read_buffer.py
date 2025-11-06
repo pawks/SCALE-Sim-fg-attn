@@ -61,12 +61,13 @@ class read_buffer:
         self.trace_valid = False
         self.use_ramulator_trace = False
         self.enable_layout_evaluation = False
+        self.delay = False
 
     #
     def set_params(self, backing_buf_obj,
                    total_size_bytes=1, word_size=1, active_buf_frac=0.9,
                    hit_latency=1, backing_buf_bw=1, num_bank=1, num_port=2,
-                   enable_layout_evaluation=False, use_ramulator_trace = False
+                   enable_layout_evaluation=False, use_ramulator_trace = False, delay = False
                    ):
         """
         Method to set the ifmap/filter double buffered memory simulation parameters for
@@ -85,7 +86,10 @@ class read_buffer:
         self.active_buf_size = int(math.ceil(self.total_size_elems * self.active_buf_frac))
         self.prefetch_buf_size = self.total_size_elems - self.active_buf_size
 
+
+
         self.backing_buffer = backing_buf_obj
+        self.backing_buffer.delay = delay
         self.req_gen_bandwidth = backing_buf_bw
 
         # Layout modeling
@@ -178,7 +182,7 @@ class read_buffer:
         elems_per_set = math.ceil(self.total_size_elems / 100)
         if self.enable_layout_evaluation:
             elems_per_set = self.req_gen_bandwidth
-        
+
         prefetch_rows = self.fetch_matrix.shape[0]
         prefetch_cols = self.fetch_matrix.shape[1]
 
@@ -317,9 +321,9 @@ class read_buffer:
                       if potential_stall_cycles > 0:
                           offset += potential_stall_cycles
                       line_addr, column_addr = self.active_buffer_hit(addr)
-                  
-                  # Layout Modeling 1 -- data mapping to multiple bank 
-                  # The 2D array is interleaved mapped to multiple banks. 
+
+                  # Layout Modeling 1 -- data mapping to multiple bank
+                  # The 2D array is interleaved mapped to multiple banks.
                   # e.g. (interleave mapping) addr 0 -> bank 0; addr 1 -> bank 1; addr 2 -> bank 2 ...
                   # instead of (contiguous mapping) addr 0,...,lines in a bank - 1 -> bank 0.
                   # because data access in compiled layout turns to be contiguious, which accesses the continuous addresses.
@@ -341,7 +345,7 @@ class read_buffer:
           out_cycles_arr_np = np.asarray(out_cycles_arr).reshape((len(out_cycles_arr), 1))
 
           return out_cycles_arr_np
-        
+
         else:
           for i in tqdm(range(incoming_requests_arr_np.shape[0]), disable=True):
               cycle = incoming_cycles_arr[i]
@@ -362,7 +366,7 @@ class read_buffer:
                       offset += potential_stall_cycles        # Offset increments if there were potential stalls
                       if potential_stall_cycles > 0:
                           offset += potential_stall_cycles
-                    
+
               if self.use_ramulator_trace == True:
                   out_cycles = cycle + offset + dram_stall_cycles
               else:
@@ -445,7 +449,7 @@ class read_buffer:
         else:
             self.next_line_prefetch_idx = (num_lines + 1) % self.fetch_matrix.shape[0]
 
-        return (self.last_prefetch_cycle - cycles_arr[-1][0] - 1)   
+        return (self.last_prefetch_cycle - cycles_arr[-1][0] - 1)
     #
     def new_prefetch(self):
         """

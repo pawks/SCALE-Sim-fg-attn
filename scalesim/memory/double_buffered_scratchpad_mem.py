@@ -124,7 +124,7 @@ class double_buffered_scratchpad:
         else:
             self.ifmap_buf = rdbuf()
             self.filter_buf = rdbuf()
-            
+
             if self.use_ramulator_trace == True:
                 root_path = os.getcwd()
                 #topology_file = self.topo.split('.')[0]
@@ -144,7 +144,8 @@ class double_buffered_scratchpad:
                                       num_bank=ifmap_sram_bank_num,
                                       num_port=ifmap_sram_bank_port,
                                       enable_layout_evaluation=using_ifmap_custom_layout,
-                                      use_ramulator_trace=self.use_ramulator_trace
+                                      use_ramulator_trace=self.use_ramulator_trace,
+                                      delay = config.ifmap_dly
                                       )
 
             self.filter_buf.set_params(backing_buf_obj=self.filter_port,
@@ -155,19 +156,20 @@ class double_buffered_scratchpad:
                                        num_bank=filter_sram_bank_num,
                                        num_port=filter_sram_bank_port,
                                        enable_layout_evaluation=using_filter_custom_layout,
-                                       use_ramulator_trace=self.use_ramulator_trace
+                                       use_ramulator_trace=self.use_ramulator_trace,
+                                       delay = config.fltr_dly
                                        )
 
         self.ofmap_buf.set_params(backing_buf_obj=self.ofmap_port,
                                   total_size_bytes=ofmap_buf_size_bytes,
                                   word_size=word_size,
                                   active_buf_frac=wr_buf_active_frac,
-                                  backing_buf_bw=ofmap_backing_buf_bw)
+                                  backing_buf_bw=ofmap_backing_buf_bw, delay=config.ofmap_dly)
 
         self.verbose = verbose
 
-        self.using_ifmap_custom_layout = using_ifmap_custom_layout  
-        self.using_filter_custom_layout = using_filter_custom_layout  
+        self.using_ifmap_custom_layout = using_ifmap_custom_layout
+        self.using_filter_custom_layout = using_filter_custom_layout
         self.params_valid_flag = True
 
 
@@ -276,7 +278,7 @@ class double_buffered_scratchpad:
             ofmap_serviced_cycles += [ofmap_cycle_out[0]]
             ofmap_stalls = ofmap_cycle_out[0] - cycle_arr[0]
 
-            self.stall_cycles += int(max(ifmap_stalls[0], filter_stalls[0], ofmap_stalls[0]))
+            self.stall_cycles += int(max([ifmap_stalls[0], filter_stalls[0], ofmap_stalls[0]]))
             #self.stall_cycles += ifmap_stalls[0] + filter_stalls[0] + ofmap_stalls[0]
 
         if self.estimate_bandwidth_mode:

@@ -67,7 +67,7 @@ class write_buffer:
     #
     def set_params(self, backing_buf_obj,
                    total_size_bytes=128, word_size=1, active_buf_frac=0.9,
-                   backing_buf_bw=100
+                   backing_buf_bw=100, delay = True
                    ):
         """
         Method to set the ofmap memory simulation parameters for housekeeping.
@@ -79,6 +79,7 @@ class write_buffer:
         self.active_buf_frac = active_buf_frac
 
         self.backing_buffer = backing_buf_obj
+        self.backing_buffer.delay = delay
         self.req_gen_bandwidth = backing_buf_bw
 
         self.total_size_elems = math.floor(self.total_size_bytes / self.word_size)

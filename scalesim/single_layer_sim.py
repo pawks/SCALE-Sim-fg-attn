@@ -227,7 +227,7 @@ class single_layer_sim:
             ifmap_prefetch_mat = self.op_mat_obj.get_ifmap_prefetch_matrix_custom_layout()
         if self.using_filter_custom_layout:
             filter_prefetch_mat = self.op_mat_obj.get_filter_prefetch_matrix_custom_layout()
-    
+
         ifmap_demand_mat, filter_demand_mat, ofmap_demand_mat = self.compute_system.get_demand_matrices()
         #print('DEBUG: Compute operations done')
         # 2. Setup the memory system and run the demands through it to find any memory bottleneck and generate traces
@@ -367,9 +367,9 @@ class single_layer_sim:
 
         self.ofmap_dram_start_cycle, self.ofmap_dram_stop_cycle, self.ofmap_dram_writes \
             = self.memory_system.get_ofmap_dram_details()
-        
+
         self.overall_cycles = int(self.ofmap_dram_stop_cycle - min(self.ifmap_dram_start_cycle,self.filter_dram_start_cycle))
-        
+
         # BW calc for DRAM access
         self.avg_ifmap_dram_bw = self.ifmap_dram_reads / \
                                 (self.ifmap_dram_stop_cycle - self.ifmap_dram_start_cycle + 1)
